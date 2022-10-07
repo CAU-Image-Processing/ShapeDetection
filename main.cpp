@@ -8,7 +8,7 @@ using namespace std;
 int main(int ac, char** av)
 {
 	// Detection 하기 위해 필요한 데이터
-	int corner = 0; // 모서리의 개수.
+	int corner = 0; // 꼭짓점의 개수.
 
 
 	// 이미지 받아옴
@@ -52,17 +52,82 @@ int main(int ac, char** av)
 				arr[n][row][col][0] = (int)r;
 				arr[n][row][col][1] = (int)g;
 				arr[n][row][col][2] = (int)b;
-				printf("\t (%d, %d, %d)", r, g, b);
 			}
 			cout << "\n" << endl;
 		}
 	}
 
 	for (int n = 0; n < 4; n++) {
+		int* width = new int[img[n].rows];
 		for (int row = 0; row < img[n].rows; row++) {
+			width[row] = 0;
 			for (int col = 0; col < img[n].cols; col++) {
-
+				if (arr[n][row][col][0] != 255 || arr[n][row][col][1] != 255 || arr[n][row][col][2] != 255) {
+					width[row]++;
+				}
 			}
+		}
+
+		bool _isRectangle = true;
+		int start = 0;
+		for (int row = 0; row < img[n].rows; row++) {
+			if (width[row] != 0) {
+				start = row;
+				break;
+			}
+		}
+		
+		// rectangle detection
+		for (int row = start; row < img[n].rows; row++) {
+			if (width[row] != 0) {
+				if (width[start] - width[row] < -5 || width[start] - width[row] > 5) {
+					_isRectangle = false;
+					break;
+				}
+					
+			}
+			
+		}
+		if (!_isRectangle) {
+			// circle detection
+			bool _isCircle = false;
+			for (int row = start; row < img[n].rows-1; row++) {
+				if (width[row + 1] == 0) {
+					break;
+				}
+				else if (width[row] - width[row + 1] > 0) {
+					_isCircle = true;
+					break;
+				}
+					
+			}
+
+			if (!_isCircle) {
+				// circle detection
+				bool _isTriangle = true;
+				for (int row = start; row < img[n].rows-1; row++) {
+					if (width[row + 1] == 0) {
+						break;
+					}
+					else if (width[row + 1] - width[row] < 0) {
+						_isTriangle = false;
+						break;
+					}
+						
+				}
+				if (_isTriangle) {
+					printf("img%d.jpg의 모양은 삼각형입니다\n", n+1);
+				}
+				else {
+					printf("논리가 잘못되었습니다\n");
+				}
+			}
+			else {
+				printf("img%d.jpg의 모양은 원입니다\n", n+1);
+			}
+		}
+		else {
+			printf("img%d.jpg의 모양은 사각형입니다\n", n+1);
 		}
 	}
 	
@@ -79,3 +144,33 @@ int main(int ac, char** av)
 	waitKey(0);
 	return 0;
 }
+
+//if (row - 1 >= 0 && col - 1 >= 0 && row + 1 <= img[n].rows && col + 1 <= img[n].cols) {
+//	if (arr[n][row][col][0] == 255 && arr[n][row][col][1] == 255 && arr[n][row][col][2] == 255) {
+//
+//	}
+//	else {
+//		if ((arr[n][row - 1][col - 1][0] != 255 && arr[n][row + 1][col + 1][0] != 255)
+//			&& (arr[n][row - 1][col - 1][1] != 255 && arr[n][row + 1][col + 1][1] != 255)
+//			&& (arr[n][row - 1][col - 1][2] != 255 && arr[n][row + 1][col + 1][2] != 255)) {
+//
+//		}
+//		else if ((arr[n][row][col - 1][0] != 255 && arr[n][row][col + 1][0] != 255)
+//			&& (arr[n][row][col - 1][1] != 255 && arr[n][row][col + 1][1] != 255)
+//			&& (arr[n][row][col - 1][2] != 255 && arr[n][row][col + 1][2] != 255)) {
+//
+//		}
+//		else if ((arr[n][row + 1][col - 1][0] != 255 && arr[n][row - 1][col + 1][0] != 255)
+//			&& (arr[n][row + 1][col - 1][1] != 255 && arr[n][row - 1][col + 1][1] != 255)
+//			&& (arr[n][row + 1][col - 1][2] != 255 && arr[n][row - 1][col + 1][2] != 255)) {
+//
+//		}
+//		else if ((arr[n][row - 1][col][0] != 255 && arr[n][row + 1][col][0] != 255)
+//			&& (arr[n][row - 1][col][1] != 255 && arr[n][row + 1][col][1] != 255)
+//			&& (arr[n][row - 1][col][2] != 255 && arr[n][row + 1][col][2] != 255)) {
+//		}
+//		else {
+//			corner += 1;
+//		}
+//	}
+//}
